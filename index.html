@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue Functional Components Demo</title>
+    <!-- Vue 2 CDN for demonstration of 'functional: true' -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; line-height: 1.6; color: #333; }
+        #app { max-width: 800px; margin: 0 auto; background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .component-box { border: 1px solid #ccc; padding: 20px; margin-bottom: 25px; border-radius: 6px; }
+        .regular-component { background-color: #e6f7ff; border-color: #91d5ff; }
+        .functional-component { background-color: #f6ffed; border-color: #b7eb8f; }
+        h1, h3 { color: #2c3e50; margin-top: 0; }
+        p { margin-bottom: 10px; }
+        button { padding: 10px 18px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; transition: background-color 0.2s ease; }
+        button:hover { background-color: #0056b3; }
+        strong { color: #555; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Vue.js Functional Components Demo (Vue 2)</h1>
+        <p>This example illustrates the difference between a regular, stateful Vue component and a lightweight, stateless functional component.</p>
+
+        <div class="component-box regular-component">
+            <h3>Regular Vue Component (Stateful)</h3>
+            <p>This component has its own internal <code>data</code> and <code>methods</code>, managing its state independently.</p>
+            <my-regular-component initial-message="Hello from parent"></my-regular-component>
+        </div>
+
+        <div class="component-box functional-component">
+            <h3>Functional Vue Component (Stateless)</h3>
+            <p>This component is lightweight, has no internal state, and only renders based on the <code>props</code> it receives from its parent.</p>
+            <my-functional-component
+                :message="parentMessage"
+                :count="parentCount"
+            ></my-functional-component>
+            <button @click="incrementParentCount">Increment Parent Count</button>
+            <p style="margin-top: 15px; font-size: 0.9em; color: #666;">Watch the functional component update when the parent count changes, as it directly reflects its props.</p>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. Define a regular (stateful) Vue component
+        // This component has its own data, methods, and lifecycle hooks (though not shown here).
+        Vue.component('my-regular-component', {
+            props: ['initialMessage'],
+            data() {
+                return {
+                    internalCount: 0, // Internal state
+                    currentMessage: this.initialMessage + ' (internal)'
+                };
+            },
+            methods: {
+                increment() { // Internal method to modify internal state
+                    this.internalCount++;
+                }
+            },
+            template: `
+                <div>
+                    <p><strong>Message:</strong> {{ currentMessage }}</p>
+                    <p><strong>Internal Count:</strong> {{ internalCount }}</p>
+                    <button @click="increment">Increment Internal Count</button>
+                </div>
+            `
+        });
+
+        // 2. Define a functional (stateless) Vue component
+        // Functional components are instance-less, have no internal state, and are optimized
+        // for purely presentational rendering based on props. They are typically faster.
+        Vue.component('my-functional-component', {
+            functional: true, // This property explicitly marks the component as functional in Vue 2
+            props: ['message', 'count'],
+            // The render function receives `h` (createElement) and `context`.
+            // `context.props` contains the props passed to the component.
+            // Functional components do not have `this` context for data/methods.
+            render(h, context) {
+                return h('div', [
+                    h('p', `<strong>Message from Parent:</strong> ${context.props.message}`),
+                    h('p', `<strong>Count from Parent:</strong> ${context.props.count}`)
+                ]);
+            }
+        });
+
+        // Root Vue instance
+        new Vue({
+            el: '#app',
+            data: {
+                parentMessage: 'Hello from parent app!',
+                parentCount: 0
+            },
+            methods: {
+                incrementParentCount() {
+                    this.parentCount++;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
